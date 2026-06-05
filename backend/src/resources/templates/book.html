@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ca" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${book.title}">Detall del llibre</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+<header class="header">
+    <div class="header-left">
+        <a href="/" class="back-link">← Biblioteca</a>
+    </div>
+    <form action="/search-books" method="get" class="header-search">
+        <input type="text" name="q" placeholder="Cerca un llibre per afegir...">
+        <button type="submit">Cercar</button>
+    </form>
+</header>
+
+<main class="main">
+    <div class="book-detail">
+
+        <!-- Columna esquerra: portada i metadades -->
+        <aside class="detail-left">
+            <div class="detail-cover">
+                <img th:if="${book.coverUrl != null}" th:src="${book.coverUrl}" th:alt="${book.title}">
+                <span th:unless="${book.coverUrl != null}">📚</span>
+            </div>
+            <div class="detail-meta">
+                <h2 th:text="${book.title}">Títol</h2>
+                <p class="detail-author" th:text="${book.author}">Autor</p>
+                <p th:if="${book.genre != null}"      class="detail-info" th:text="${book.genre}"></p>
+                <p th:if="${book.totalPages != null}" class="detail-info" th:text="${book.totalPages} + ' pàgines'"></p>
+                <p th:if="${book.isbn != null}"       class="detail-info" th:text="'ISBN: ' + ${book.isbn}"></p>
+                <p th:if="${book.dateAdded != null}"  class="detail-info" th:text="'Afegit: ' + ${#temporals.format(book.dateAdded, 'dd/MM/yyyy')}"></p>
+            </div>
+
+            <!-- Eliminar -->
+            <form th:action="@{/books/{id}/delete(id=${book.bookId})}" method="post" class="form-delete">
+                <button type="submit" class="btn-delete"
+                        onclick="return confirm('Segur que vols eliminar aquest llibre?')">
+                    Eliminar de la biblioteca
+                </button>
+            </form>
+        </aside>
+
+        <!-- Columna dreta: formulari d'edició -->
+        <section class="detail-right">
+            <h3 class="form-title">El meu registre</h3>
+
+            <form th:action="@{/books/{id}/update(id=${book.bookId})}" method="post" class="edit-form">
+
+                <div class="form-group">
+                    <label for="status">Estat</label>
+                    <select id="status" name="status" class="form-select">
+                        <option th:each="s : ${statuses}"
+                                th:value="${s}"
+                                th:text="${s.label}"
+                                th:selected="${s == book.status}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="rating">Puntuació</label>
+                    <select id="rating" name="rating" class="form-select">
+                        <option value="" th:selected="${book.rating == null}">Sense puntuació</option>
+                        <option th:each="i : ${#numbers.sequence(1, 5)}"
+                                th:value="${i}"
+                                th:text="${i == 1} ? '1 ★' : (${i == 2} ? '2 ★★' : (${i == 3} ? '3 ★★★' : (${i == 4} ? '4 ★★★★' : '5 ★★★★★')))"
+                                th:selected="${i == book.rating}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group" th:if="${book.totalPages != null}">
+                    <label th:for="currentPage">
+                        Pàgina actual
+                        <span class="label-hint" th:text="'(de ' + ${book.totalPages} + ')'"></span>
+                    </label>
+                    <input type="number" id="currentPage" name="currentPage"
+                           th:value="${book.currentPage}" min="0" th:max="${book.totalPages}"
+                           class="form-input">
+                    <div class="progress-bar" th:if="${book.currentPage != null and book.totalPages > 0}">
+                        <div class="progress-fill"
+                             th:style="'width:' + ${(book.currentPage * 100 / book.totalPages)} + '%'"></div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dateStarted">Inici</label>
+                        <input type="date" id="dateStarted" name="dateStarted"
+                               th:value="${book.dateStarted}" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="dateFinished">Fi</label>
+                        <input type="date" id="dateFinished" name="dateFinished"
+                               th:value="${book.dateFinished}" class="form-input">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="review">Ressenya</label>
+                    <textarea id="review" name="review" rows="6" class="form-textarea"
+                              placeholder="Escriu la teva opinió..." th:text="${book.review}"></textarea>
+                </div>
+
+                <button type="submit" class="btn-save">Guardar canvis</button>
+
+            </form>
+        </section>
+
+    </div>
+</main>
+
+</body>
+</html>

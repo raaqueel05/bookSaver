@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ca" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Llibres</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+<header class="header">
+    <div class="header-left">
+        <span class="logo">📚</span>
+        <h1 class="app-title">Llibres</h1>
+    </div>
+    <form action="/search-books" method="get" class="header-search">
+        <input type="text" name="q" placeholder="Cerca un llibre per afegir...">
+        <button type="submit">Cercar</button>
+    </form>
+</header>
+
+<main class="main">
+
+    <section class="stats">
+        <div class="stat-card reading">
+            <span class="stat-value" th:text="${countReading}">0</span>
+            <span class="stat-label">Llegint ara</span>
+        </div>
+        <div class="stat-card read">
+            <span class="stat-value" th:text="${countRead}">0</span>
+            <span class="stat-label">Llegits</span>
+        </div>
+        <div class="stat-card pending">
+            <span class="stat-value" th:text="${countPending}">0</span>
+            <span class="stat-label">Pendents</span>
+        </div>
+        <div class="stat-card paused">
+            <span class="stat-value" th:text="${countPaused}">0</span>
+            <span class="stat-label">Pausats</span>
+        </div>
+    </section>
+
+    <div class="toolbar">
+        <nav class="filters">
+            <a th:href="@{/}"                    class="filter-btn" th:classappend="${activeStatus == ''}        ? ' active'">Tots</a>
+            <a th:href="@{/(status='READING')}"  class="filter-btn" th:classappend="${activeStatus == 'READING'} ? ' active'">Llegint</a>
+            <a th:href="@{/(status='READ')}"     class="filter-btn" th:classappend="${activeStatus == 'READ'}    ? ' active'">Llegits</a>
+            <a th:href="@{/(status='PENDING')}"  class="filter-btn" th:classappend="${activeStatus == 'PENDING'} ? ' active'">Pendents</a>
+            <a th:href="@{/(status='PAUSED')}"   class="filter-btn" th:classappend="${activeStatus == 'PAUSED'}  ? ' active'">Pausats</a>
+        </nav>
+    </div>
+
+    <section class="book-grid">
+
+        <div th:if="${#lists.isEmpty(books)}" class="empty-state">
+            <div style="font-size:56px">📖</div>
+            <p>No hi ha cap llibre aquí.<br>Fes servir el cercador per afegir-ne un!</p>
+        </div>
+
+        <a th:each="book : ${books}" th:href="@{/books/{id}(id=${book.bookId})}" class="book-card">
+            <div class="book-cover">
+                <img th:if="${book.coverUrl != null}" th:src="${book.coverUrl}" th:alt="${book.title}">
+                <span th:unless="${book.coverUrl != null}">📚</span>
+            </div>
+            <div class="book-info">
+                <span class="book-title"  th:text="${book.title}">Títol</span>
+                <span class="book-author" th:text="${book.author}">Autor</span>
+                <div class="book-footer">
+                    <span class="status-badge" th:classappend="'status-' + ${book.status}" th:text="${book.status.label}">Estat</span>
+                    <span th:if="${book.rating != null}" class="book-rating"
+                          th:text="${'★★★★★'.substring(0, book.rating) + '☆☆☆☆☆'.substring(0, 5 - book.rating)}">
+                    </span>
+                </div>
+            </div>
+        </a>
+
+    </section>
+
+</main>
+
+</body>
+</html>
