@@ -62,7 +62,8 @@
                     </select>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" id="rating-group"
+                     th:style="${book.status != null and book.status.name() == 'READ'} ? '' : 'display:none'">
                     <label for="rating">Puntuació</label>
                     <select id="rating" name="rating" class="form-select">
                         <option value="" th:selected="${book.rating == null}">Sense puntuació</option>
@@ -115,5 +116,26 @@
     </div>
 </main>
 
+<script>
+    const statusSelect = document.getElementById('status');
+    const ratingGroup = document.getElementById('rating-group');
+
+    const currentPageInput = document.getElementById('currentPage');
+    const totalPages = currentPageInput ? parseInt(currentPageInput.max) : 0;
+    let pageBeforeRead = currentPageInput ? parseInt(currentPageInput.value) || 0 : 0;
+
+    statusSelect.addEventListener('change', function () {
+        const isRead = this.value === 'READ';
+        ratingGroup.style.display = isRead ? '' : 'none';
+        if (currentPageInput) {
+            if (isRead && totalPages > 0) {
+                pageBeforeRead = parseInt(currentPageInput.value) || 0;
+                currentPageInput.value = totalPages;
+            } else {
+                currentPageInput.value = pageBeforeRead;
+            }
+        }
+    });
+</script>
 </body>
 </html>
