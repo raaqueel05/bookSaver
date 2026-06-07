@@ -35,3 +35,7 @@ target/
 
 ### H2 Database ###
 data/
+
+### Generated app (jpackage output) ###
+BookSaver/
+*.jar
