@@ -115,14 +115,24 @@
 <script>
     flatpickr.localize(flatpickr.l10ns.cat);
 
-    const pickerConfig = {
+    const fpEnd = flatpickr("#dateFinished", {
         dateFormat: "Y-m-d",
         altInput: true,
         altFormat: "d/m/Y",
         allowInput: false
-    };
-    flatpickr("#dateStarted",  pickerConfig);
-    flatpickr("#dateFinished", pickerConfig);
+    });
+
+    flatpickr("#dateStarted", {
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d/m/Y",
+        allowInput: false,
+        onChange: function(selectedDates) {
+            if (selectedDates.length > 0) {
+                fpEnd.jumpToDate(selectedDates[0]);
+            }
+        }
+    });
 
     const statusSelect = document.getElementById('status');
     const ratingGroup  = document.getElementById('rating-group');
