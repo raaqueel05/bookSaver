@@ -5,80 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${book.title}">Detall del llibre</title>
     <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
 
 <header class="header">
-    <div class="header-left">
-        <a href="/" class="back-link">← Biblioteca</a>
-    </div>
-    <form action="/search-books" method="get" class="header-search">
-        <input type="text" name="q" placeholder="Cerca un llibre per afegir...">
-        <button type="submit">Cercar</button>
-    </form>
+    <a href="/" class="logo-link">
+        <span class="logo-top">la meva</span>
+        <span class="logo-bottom">prestatgeria</span>
+    </a>
+    <a href="/" class="back-link">← enrere</a>
 </header>
 
 <main class="main">
     <div class="book-detail">
 
-        <!-- Columna esquerra: portada i metadades -->
         <aside class="detail-left">
-            <div class="detail-cover">
+            <div class="detail-cover" th:classappend="'card-' + ${book.status}">
                 <img th:if="${book.coverUrl != null}" th:src="${book.coverUrl}" th:alt="${book.title}">
-                <span th:unless="${book.coverUrl != null}">📚</span>
+                <span th:unless="${book.coverUrl != null}" class="cover-placeholder large" th:text="${#strings.substring(book.title, 0, 1)}">?</span>
             </div>
+
             <div class="detail-meta">
                 <h2 th:text="${book.title}">Títol</h2>
                 <p class="detail-author" th:text="${book.author}">Autor</p>
                 <p th:if="${book.genre != null}"      class="detail-info" th:text="${book.genre}"></p>
                 <p th:if="${book.totalPages != null}" class="detail-info" th:text="${book.totalPages} + ' pàgines'"></p>
-                <p th:if="${book.isbn != null}"       class="detail-info" th:text="'ISBN: ' + ${book.isbn}"></p>
-                <p th:if="${book.dateAdded != null}"  class="detail-info" th:text="'Afegit: ' + ${#temporals.format(book.dateAdded, 'dd/MM/yyyy')}"></p>
+                <p th:if="${book.dateAdded != null}"  class="detail-info" th:text="'afegit: ' + ${#temporals.format(book.dateAdded, 'dd/MM/yyyy')}"></p>
             </div>
 
-            <!-- Eliminar -->
             <form th:action="@{/books/{id}/delete(id=${book.bookId})}" method="post" class="form-delete">
                 <button type="submit" class="btn-delete"
-                        onclick="return confirm('Segur que vols eliminar aquest llibre?')">
-                    Eliminar de la biblioteca
+                        onclick="return confirm('Segur que vols treure aquest llibre?')">
+                    treure de la prestatgeria
                 </button>
             </form>
         </aside>
 
-        <!-- Columna dreta: formulari d'edició -->
         <section class="detail-right">
-            <h3 class="form-title">El meu registre</h3>
-
             <form th:action="@{/books/{id}/update(id=${book.bookId})}" method="post" class="edit-form">
 
-                <div class="form-group">
-                    <label for="status">Estat</label>
-                    <select id="status" name="status" class="form-select">
-                        <option th:each="s : ${statuses}"
-                                th:value="${s}"
-                                th:text="${s.label}"
-                                th:selected="${s == book.status}">
-                        </option>
-                    </select>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="status">Estat</label>
+                        <select id="status" name="status" class="form-select">
+                            <option th:each="s : ${statuses}"
+                                    th:value="${s}"
+                                    th:text="${s.label}"
+                                    th:selected="${s == book.status}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="rating-group"
+                         th:style="${book.status != null and book.status.name() == 'READ'} ? '' : 'visibility:hidden'">
+                        <label for="rating">Puntuació</label>
+                        <select id="rating" name="rating" class="form-select">
+                            <option value="" th:selected="${book.rating == null}">—</option>
+                            <option th:each="i : ${#numbers.sequence(1, 5)}"
+                                    th:value="${i}"
+                                    th:text="${i == 1} ? '★' : (${i == 2} ? '★★' : (${i == 3} ? '★★★' : (${i == 4} ? '★★★★' : '★★★★★')))"
+                                    th:selected="${i == book.rating}">
+                            </option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="form-group" id="rating-group"
-                     th:style="${book.status != null and book.status.name() == 'READ'} ? '' : 'display:none'">
-                    <label for="rating">Puntuació</label>
-                    <select id="rating" name="rating" class="form-select">
-                        <option value="" th:selected="${book.rating == null}">Sense puntuació</option>
-                        <option th:each="i : ${#numbers.sequence(1, 5)}"
-                                th:value="${i}"
-                                th:text="${i == 1} ? '1 ★' : (${i == 2} ? '2 ★★' : (${i == 3} ? '3 ★★★' : (${i == 4} ? '4 ★★★★' : '5 ★★★★★')))"
-                                th:selected="${i == book.rating}">
-                        </option>
-                    </select>
+                <div class="form-group review-group">
+                    <label for="review">el que en penso</label>
+                    <textarea id="review" name="review" rows="8" class="form-textarea"
+                              placeholder="Algun moment favorit? Alguna cosa que t'hagi sorprès?" th:text="${book.review}"></textarea>
                 </div>
 
                 <div class="form-group" th:if="${book.totalPages != null}">
                     <label th:for="currentPage">
-                        Pàgina actual
-                        <span class="label-hint" th:text="'(de ' + ${book.totalPages} + ')'"></span>
+                        Pàgina actual <span class="label-hint" th:text="'· de ' + ${book.totalPages}"></span>
                     </label>
                     <input type="number" id="currentPage" name="currentPage"
                            th:value="${book.currentPage}" min="0" th:max="${book.totalPages}"
@@ -89,26 +89,20 @@
                     </div>
                 </div>
 
-                <div class="form-row">
+                <div class="form-row dates-row">
                     <div class="form-group">
                         <label for="dateStarted">Inici</label>
-                        <input type="date" id="dateStarted" name="dateStarted"
-                               th:value="${book.dateStarted}" class="form-input">
+                        <input type="text" id="dateStarted" name="dateStarted"
+                               th:value="${book.dateStarted}" class="form-input" readonly>
                     </div>
                     <div class="form-group">
-                        <label for="dateFinished">Fi</label>
-                        <input type="date" id="dateFinished" name="dateFinished"
-                               th:value="${book.dateFinished}" class="form-input">
+                        <label for="dateFinished">Final</label>
+                        <input type="text" id="dateFinished" name="dateFinished"
+                               th:value="${book.dateFinished}" class="form-input" readonly>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="review">Ressenya</label>
-                    <textarea id="review" name="review" rows="6" class="form-textarea"
-                              placeholder="Escriu la teva opinió..." th:text="${book.review}"></textarea>
-                </div>
-
-                <button type="submit" class="btn-save">Guardar canvis</button>
+                <button type="submit" class="btn-save">Guardar</button>
 
             </form>
         </section>
@@ -116,9 +110,22 @@
     </div>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/cat.js"></script>
 <script>
+    flatpickr.localize(flatpickr.l10ns.cat);
+
+    const pickerConfig = {
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d/m/Y",
+        allowInput: false
+    };
+    flatpickr("#dateStarted",  pickerConfig);
+    flatpickr("#dateFinished", pickerConfig);
+
     const statusSelect = document.getElementById('status');
-    const ratingGroup = document.getElementById('rating-group');
+    const ratingGroup  = document.getElementById('rating-group');
 
     const currentPageInput = document.getElementById('currentPage');
     const totalPages = currentPageInput ? parseInt(currentPageInput.max) : 0;
@@ -126,7 +133,7 @@
 
     statusSelect.addEventListener('change', function () {
         const isRead = this.value === 'READ';
-        ratingGroup.style.display = isRead ? '' : 'none';
+        ratingGroup.style.visibility = isRead ? 'visible' : 'hidden';
         if (currentPageInput) {
             if (isRead && totalPages > 0) {
                 pageBeforeRead = parseInt(currentPageInput.value) || 0;

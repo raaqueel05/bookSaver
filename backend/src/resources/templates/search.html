@@ -3,31 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cercar llibres</title>
+    <title>cercar — la meva prestatgeria</title>
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
 
 <header class="header">
-    <div class="header-left">
-        <a href="/" class="back-link">← Biblioteca</a>
-    </div>
+    <a href="/" class="logo-link">
+        <span class="logo-top">la meva</span>
+        <span class="logo-bottom">prestatgeria</span>
+    </a>
     <form action="/search-books" method="get" class="header-search">
-        <input type="text" name="q" th:value="${query}" placeholder="Cerca un llibre...">
-        <button type="submit">Cercar</button>
+        <input type="text" name="q" th:value="${query}" placeholder="cerca un llibre nou...">
+        <button type="submit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
     </form>
+    <a href="/" class="back-link">← enrere</a>
 </header>
 
 <main class="main">
 
     <h2 class="search-title" th:if="${query != null and !#strings.isEmpty(query)}">
-        Resultats per "<span th:text="${query}"></span>"
+        Resultats per <strong th:text="${query}"></strong>
     </h2>
 
     <div th:if="${results == null or #lists.isEmpty(results)}" class="empty-state">
-        <div style="font-size:56px">🔍</div>
-        <p th:if="${query != null and !#strings.isEmpty(query)}">No s'han trobat resultats per "<span th:text="${query}"></span>".</p>
-        <p th:unless="${query != null and !#strings.isEmpty(query)}">Escriu un títol per cercar.</p>
+        <span class="empty-icon">— —</span>
+        <p th:if="${query != null and !#strings.isEmpty(query)}">
+            Hmm, no he trobat res per «<span th:text="${query}"></span>».<br>Potser prova amb un altre títol?
+        </p>
+        <p th:unless="${query != null and !#strings.isEmpty(query)}">Quin serà el proper?</p>
     </div>
 
     <div class="search-results-list" th:unless="${results == null or #lists.isEmpty(results)}">
@@ -35,7 +41,8 @@
 
             <div class="result-cover">
                 <img th:if="${result.coverUrl != null}" th:src="${result.coverUrl}" th:alt="${result.title}">
-                <span th:unless="${result.coverUrl != null}">📚</span>
+                <span th:unless="${result.coverUrl != null}" class="cover-placeholder"
+                      th:text="${#strings.substring(result.title, 0, 1)}">?</span>
             </div>
 
             <div class="result-info">
@@ -54,7 +61,7 @@
                 <input type="hidden" name="isbn"       th:value="${result.isbn}">
                 <input type="hidden" name="genre"      th:value="${result.genre}">
                 <input type="hidden" name="totalPages" th:value="${result.totalPages}">
-                <button type="submit" class="btn-add-result">+ Afegir</button>
+                <button type="submit" class="btn-add-result">Afegir</button>
             </form>
 
         </div>
